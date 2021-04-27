@@ -6,8 +6,8 @@ msgstr ""
 "Project-Id-Version: Python 3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-08-24 09:01+0200\n"
-"PO-Revision-Date: 2018-06-17 10:15+0200\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2021-04-27 18:38+0200\n"
+"Last-Translator: Julien Palard <julien@palard.fr>\n"
 "Language-Team: FRENCH <traductions@lists.afpy.org>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 
 #: extending/newtypes_tutorial.rst:7
 msgid "Defining Extension Types: Tutorial"
-msgstr ""
+msgstr "Tutoriel : Définir des types dans des extensions"
 
 #: extending/newtypes_tutorial.rst:14
 msgid ""
@@ -26,10 +26,14 @@ msgid ""
 "pattern, but there are some details that you need to understand before you "
 "can get started.  This document is a gentle introduction to the topic."
 msgstr ""
+"Python permet à l'auteur d'un module d'extension C de définir de nouveaux "
+"types qui peuvent être manipulés depuis du code Python, tel que les types "
+"natifs :class:`str` et :class:`list`. Le code de ces types suit un motif, "
+"mais quelques subtilités doivent être abordées avant de commencer."
 
 #: extending/newtypes_tutorial.rst:24
 msgid "The Basics"
-msgstr ""
+msgstr "Les bases"
 
 #: extending/newtypes_tutorial.rst:26
 msgid ""
@@ -42,12 +46,22 @@ msgid ""
 "an object, a method called, or it is multiplied by another object.  These C "
 "functions are called \"type methods\"."
 msgstr ""
+":term:`CPython` considère que tous les objets Python sont des variables de "
+"type :c:type:`PyObject\\\\*`, qui sert de type de base pour tous les objets "
+"Python. La structure de :c:type:`PyObject` ne contient que le :term:"
+"`compteur de référence <reference count>` et un pointeur vers le type de "
+"l'objet. C'est ici que tout se joue : l'objet type détermine quelle fonction "
+"(C) doit être appelée par l'interpréteur quand, par exemple, un attribut est "
+"recherché sur un objet, une méthode est appelée, ou l'objet est multiplié "
+"par un autre objet. Ces fonctions C sont appelées des « méthodes de type »."
 
 #: extending/newtypes_tutorial.rst:35
 msgid ""
 "So, if you want to define a new extension type, you need to create a new "
 "type object."
 msgstr ""
+"Donc, pour définir un nouveaux type dans une extension, vous devez créer un "
+"nouvel objet type."
 
 #: extending/newtypes_tutorial.rst:38
 msgid ""
@@ -55,6 +69,9 @@ msgid ""
 "but complete, module that defines a new type named :class:`Custom` inside a "
 "C extension module :mod:`custom`:"
 msgstr ""
+"Ce genre de chose ne s'explique correctement qu'avec des exemples, voici "
+"donc un module minimaliste mais suffisant qui définit un nouveau type nommé :"
+"class:`Custom` dans le module d'extension :mod:`custom` : "
 
 #: extending/newtypes_tutorial.rst:43
 msgid ""
@@ -63,18 +80,27 @@ msgid ""
 "allows defining heap-allocated extension types using the :c:func:"
 "`PyType_FromSpec` function, which isn't covered in this tutorial."
 msgstr ""
+"Ce qui est montré ici est la manière traditionnelle de définir des types "
+"d'extension *statiques*, ce qui convient dans la majorité des cas. L'API C "
+"permet aussi de définir des types alloués sur le tas, via la fonction :c:"
+"func:`PyType_FromSpec`, mais ce n'est pas couvert par ce tutoriel."
 
 #: extending/newtypes_tutorial.rst:50
 msgid ""
 "Now that's quite a bit to take in at once, but hopefully bits will seem "
 "familiar from the previous chapter.  This file defines three things:"
 msgstr ""
+"C'est un peu long, mais vous devez déjà reconnaître quelques morceaux "
+"expliqués au chapitre précédent. Ce fichier définit trois choses :"
 
 #: extending/newtypes_tutorial.rst:53
 msgid ""
 "What a :class:`Custom` **object** contains: this is the ``CustomObject`` "
 "struct, which is allocated once for each :class:`Custom` instance."
 msgstr ""
+"Ce qu'un **objet** :class:`Custom` contient : c'est la structure "
+"``CustomObject``, qui est allouée une fois pour chaque instance de :class:"
+"`Custom`."
 
 #: extending/newtypes_tutorial.rst:55
 msgid ""
@@ -82,16 +108,21 @@ msgid ""
 "which defines a set of flags and function pointers that the interpreter "
 "inspects when specific operations are requested."
 msgstr ""
+"Comment le **type** :class:`Custom` se comporte : c'est la structure "
+"``CustomType``, qui définit l'ensemble des options et pointeurs de fonction "
+"utilisés par l'interpréteur."
 
 #: extending/newtypes_tutorial.rst:58
 msgid ""
 "How to initialize the :mod:`custom` module: this is the ``PyInit_custom`` "
 "function and the associated ``custommodule`` struct."
 msgstr ""
+"Comment initialiser le module :mod:`custom` : c'est la fonction "
+"``PyInit_custom`` et la structure associée ``custommodule``."
 
 #: extending/newtypes_tutorial.rst:61
 msgid "The first bit is::"
-msgstr ""
+msgstr "Commençons par ::"
 
 #: extending/newtypes_tutorial.rst:67
 msgid ""
@@ -102,12 +133,22 @@ msgid ""
 "and :c:macro:`Py_TYPE` respectively).  The reason for the macro is to "
 "abstract away the layout and to enable additional fields in debug builds."
 msgstr ""
+"C'est ce qu'un objet ``Cusom`` contient. ``PyObject_HEAD`` est "
+"obligatoirement au début de chaque structure d'objet et définit un champ "
+"appelé ``ob_base`` de type :c:type:`PyObject`, contenant un pointeur vers un "
+"objet type et un compteur de référence (qui peuvent être accédés en "
+"utilisant les macros :c:macro:`Py_REFCNT` et :c:macro:`Py_TYPE`, "
+"respectivement). La raison d'être de ces macros est d'abstraire l'agencement "
+"de la structure, et ainsi de permettre l'ajout de champs en mode débogage."
 
 #: extending/newtypes_tutorial.rst:75
 msgid ""
 "There is no semicolon above after the :c:macro:`PyObject_HEAD` macro. Be "
 "wary of adding one by accident: some compilers will complain."
 msgstr ""
+"Il n'y a pas de point-virgule après la macro :c:macro:`PyObject_HEAD`. "
+"Attention à ne pas l'ajouter par accident : certains compilateur pourraient "
+"s'en plaindre."
 
 #: extending/newtypes_tutorial.rst:78
 msgid ""
@@ -115,10 +156,13 @@ msgid ""
 "``PyObject_HEAD`` boilerplate; for example, here is the definition for "
 "standard Python floats::"
 msgstr ""
+"Bien sûr, les objets ajoutent généralement des données supplémentaires après "
+"l'entête standard ``PyObject_HEAD``. Par exemple voici la définition du type "
+"standard Python ``float`` ::"
 
 #: extending/newtypes_tutorial.rst:87
 msgid "The second bit is the definition of the type object. ::"
-msgstr ""
+msgstr "La deuxième partie est la définition de l'objet type ::"
 
 #: extending/newtypes_tutorial.rst:100
 msgid ""
